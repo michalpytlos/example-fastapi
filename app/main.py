@@ -31,7 +31,7 @@ def get_post(id: int, db: Session = Depends(database.get_db)) -> schemas.Post:
 
 
 @app.post("/posts", status_code=status.HTTP_201_CREATED)
-def create_post(post: schemas.Post, db: Session = Depends(database.get_db)) -> schemas.Post:
+def create_post(post: schemas.BasePost, db: Session = Depends(database.get_db)) -> schemas.Post:
     new_post = models.Post(**post.model_dump())
     db.add(new_post)
     db.commit()
@@ -41,7 +41,7 @@ def create_post(post: schemas.Post, db: Session = Depends(database.get_db)) -> s
 
 
 @app.put("/posts/{id}")
-def update_post(id: int, updated_post: schemas.Post, db: Session = Depends(database.get_db)) -> schemas.Post:
+def update_post(id: int, updated_post: schemas.BasePost, db: Session = Depends(database.get_db)) -> schemas.Post:
     stmt = update(models.Post).where(models.Post.id == id).values(**updated_post.model_dump())
     result = db.execute(stmt)
     if result.rowcount == 0:

@@ -1,11 +1,14 @@
 from pydantic import BaseModel
 
 
-class Post(BaseModel):
-    id: int
+class BasePost(BaseModel):
     title: str
     content: str
     published: bool = True
+
+
+class Post(BasePost):
+    id: int
 
     class Config:
         orm_mode = True
