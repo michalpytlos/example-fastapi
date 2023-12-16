@@ -12,7 +12,14 @@
                 "--port",
                 "8000"
             ],
-            "jinja": true
+            "jinja": true,
+            "env": {
+                "DB__USERNAME": "postboard",
+                "DB__PASSWORD": "postboard",
+                "DB__HOST": "localhost",
+                "DB__PORT": "5432",
+                "DB__DATABASE": "postboard"
+            }
         }
     ]
 }
