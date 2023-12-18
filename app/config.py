@@ -10,8 +10,15 @@ class DatabaseConnection(BaseModel):
     database: str
 
 
+class OAuth2(BaseModel):
+    secret_key: str
+    algorithm: str
+    access_token_expire_minutes: int
+
+
 class Settings(BaseSettings):
     db: DatabaseConnection
+    oath2: OAuth2
 
     class Config:
         env_nested_delimiter = "__"
