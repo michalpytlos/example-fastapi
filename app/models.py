@@ -1,5 +1,6 @@
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from datetime import datetime
+
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.sql.expression import text
 
 
@@ -14,4 +15,6 @@ class Post(Base):
     title: Mapped[str]
     content: Mapped[str]
     published: Mapped[bool]
-    created_at: Mapped[datetime] = mapped_column(server_default=text("CURRENT_TIMESTAMP AT TIME ZONE 'UTC'"))
+    created_at: Mapped[datetime] = mapped_column(
+        server_default=text("CURRENT_TIMESTAMP AT TIME ZONE 'UTC'")
+    )

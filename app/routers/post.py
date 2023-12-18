@@ -1,5 +1,4 @@
-
-from fastapi import Depends, HTTPException, status, APIRouter
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import delete, select, update
 from sqlalchemy.orm import Session
 
@@ -20,12 +19,16 @@ def get_post(id: int, db: Session = Depends(database.get_db)) -> schemas.Post:
     stmt = select(models.Post).where(models.Post.id == id)
     post = db.execute(stmt).scalars().first()
     if not post:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Post not found"
+        )
     return post
 
 
 @router.post("", status_code=status.HTTP_201_CREATED)
-def create_post(post: schemas.BasePost, db: Session = Depends(database.get_db)) -> schemas.Post:
+def create_post(
+    post: schemas.BasePost, db: Session = Depends(database.get_db)
+) -> schemas.Post:
     new_post = models.Post(**post.model_dump())
     db.add(new_post)
     db.commit()
@@ -35,11 +38,19 @@ def create_post(post: schemas.BasePost, db: Session = Depends(database.get_db)) 
 
 
 @router.put("/{id}")
-def update_post(id: int, updated_post: schemas.BasePost, db: Session = Depends(database.get_db)) -> schemas.Post:
-    stmt = update(models.Post).where(models.Post.id == id).values(**updated_post.model_dump())
+def update_post(
+    id: int, updated_post: schemas.BasePost, db: Session = Depends(database.get_db)
+) -> schemas.Post:
+    stmt = (
+        update(models.Post)
+        .where(models.Post.id == id)
+        .values(**updated_post.model_dump())
+    )
     result = db.execute(stmt)
     if result.rowcount == 0:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Post not found"
+        )
     db.commit()
     stmt = select(models.Post).where(models.Post.id == id)
     return db.execute(stmt).scalars().first()
@@ -50,5 +61,7 @@ def delete_post(id: int, db: Session = Depends(database.get_db)):
     stmt = delete(models.Post).where(models.Post.id == id)
     result = db.execute(stmt)
     if result.rowcount == 0:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Post not found"
+        )
     db.commit()

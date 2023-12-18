@@ -1,5 +1,6 @@
-from pydantic import BaseModel
 from datetime import datetime
+
+from pydantic import BaseModel
 
 
 class BasePost(BaseModel):
@@ -14,4 +15,3 @@ class Post(BasePost):
 
     class Config:
         orm_mode = True
- 
