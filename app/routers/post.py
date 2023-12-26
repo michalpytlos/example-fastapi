@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import delete, select, update
 from sqlalchemy.orm import Session
 
-from .. import database, models, schemas
+from .. import database, models, schemas, security
 
 router = APIRouter(prefix="/posts", tags=["posts"])
 
@@ -27,7 +27,9 @@ def get_post(id: int, db: Session = Depends(database.get_db)) -> schemas.Post:
 
 @router.post("", status_code=status.HTTP_201_CREATED)
 def create_post(
-    post: schemas.BasePost, db: Session = Depends(database.get_db)
+    post: schemas.BasePost,
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(security.get_current_user),
 ) -> schemas.Post:
     new_post = models.Post(**post.model_dump())
     db.add(new_post)
@@ -39,7 +41,10 @@ def create_post(
 
 @router.put("/{id}")
 def update_post(
-    id: int, updated_post: schemas.BasePost, db: Session = Depends(database.get_db)
+    id: int,
+    updated_post: schemas.BasePost,
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(security.get_current_user),
 ) -> schemas.Post:
     stmt = (
         update(models.Post)
@@ -57,7 +62,11 @@ def update_post(
 
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_post(id: int, db: Session = Depends(database.get_db)):
+def delete_post(
+    id: int,
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(security.get_current_user),
+):
     stmt = delete(models.Post).where(models.Post.id == id)
     result = db.execute(stmt)
     if result.rowcount == 0:
