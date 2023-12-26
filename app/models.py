@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from sqlalchemy import ForeignKey
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.sql.expression import text
 
@@ -16,7 +17,10 @@ class Post(Base):
     content: Mapped[str]
     published: Mapped[bool]
     created_at: Mapped[datetime] = mapped_column(
-        server_default=text("CURRENT_TIMESTAMP AT TIME ZONE 'UTC'")
+        server_default=text("(TIMEZONE('utc', CURRENT_TIMESTAMP))")
+    )
+    owner_id: Mapped[int] = mapped_column(
+        ForeignKey(column="users.id", ondelete="CASCADE"), nullable=False
     )
 
 

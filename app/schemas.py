@@ -3,15 +3,16 @@ from datetime import datetime
 from pydantic import BaseModel, EmailStr
 
 
-class BasePost(BaseModel):
+class PostIn(BaseModel):
     title: str
     content: str
     published: bool = True
 
 
-class Post(BasePost):
+class PostOut(PostIn):
     id: int
     created_at: datetime
+    owner_id: int
 
     class Config:
         from_attributes = True

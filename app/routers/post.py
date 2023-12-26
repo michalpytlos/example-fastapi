@@ -8,14 +8,14 @@ router = APIRouter(prefix="/posts", tags=["posts"])
 
 
 @router.get("")
-def get_posts(db: Session = Depends(database.get_db)) -> list[schemas.Post]:
+def get_posts(db: Session = Depends(database.get_db)) -> list[schemas.PostOut]:
     stmt = select(models.Post)
     posts = db.execute(stmt).scalars().all()
     return posts
 
 
 @router.get("/{id}")
-def get_post(id: int, db: Session = Depends(database.get_db)) -> schemas.Post:
+def get_post(id: int, db: Session = Depends(database.get_db)) -> schemas.PostOut:
     stmt = select(models.Post).where(models.Post.id == id)
     post = db.execute(stmt).scalars().first()
     if not post:
@@ -27,11 +27,11 @@ def get_post(id: int, db: Session = Depends(database.get_db)) -> schemas.Post:
 
 @router.post("", status_code=status.HTTP_201_CREATED)
 def create_post(
-    post: schemas.BasePost,
+    post: schemas.PostIn,
     db: Session = Depends(database.get_db),
     current_user: models.User = Depends(security.get_current_user),
-) -> schemas.Post:
-    new_post = models.Post(**post.model_dump())
+) -> schemas.PostOut:
+    new_post = models.Post(owner_id=current_user.id, **post.model_dump())
     db.add(new_post)
     db.commit()
     db.refresh(new_post)
@@ -42,10 +42,10 @@ def create_post(
 @router.put("/{id}")
 def update_post(
     id: int,
-    updated_post: schemas.BasePost,
+    updated_post: schemas.PostIn,
     db: Session = Depends(database.get_db),
     current_user: models.User = Depends(security.get_current_user),
-) -> schemas.Post:
+) -> schemas.PostOut:
     stmt = (
         update(models.Post)
         .where(models.Post.id == id)
