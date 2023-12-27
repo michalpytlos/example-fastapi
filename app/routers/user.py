@@ -25,6 +25,13 @@ def create_user(
     return user
 
 
+@router.get("/me")
+def get_user_me(
+    current_user: models.User = Depends(security.get_current_user),
+) -> schemas.UserOut:
+    return current_user
+
+
 @router.get("/{id}")
 def get_user(id: int, db: Session = Depends(database.get_db)) -> schemas.UserOut:
     stmt = select(models.User).where(models.User.id == id)
