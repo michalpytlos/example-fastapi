@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import delete, select, update
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from .. import database, models, schemas, security
@@ -46,19 +46,18 @@ def update_post(
     db: Session = Depends(database.get_db),
     current_user: models.User = Depends(security.get_current_user),
 ) -> schemas.PostOut:
-    stmt = (
-        update(models.Post)
-        .where(models.Post.id == id)
-        .values(**updated_post.model_dump())
-    )
-    result = db.execute(stmt)
-    if result.rowcount == 0:
+    stmt = select(models.Post).where(models.Post.id == id)
+    post = db.execute(stmt).scalars().first()
+    if not post:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Post not found"
         )
+    if post.owner_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+    for k, v in updated_post.model_dump().items():
+        post.__setattr__(k, v)
     db.commit()
-    stmt = select(models.Post).where(models.Post.id == id)
-    return db.execute(stmt).scalars().first()
+    return post
 
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -67,10 +66,13 @@ def delete_post(
     db: Session = Depends(database.get_db),
     current_user: models.User = Depends(security.get_current_user),
 ):
-    stmt = delete(models.Post).where(models.Post.id == id)
-    result = db.execute(stmt)
-    if result.rowcount == 0:
+    stmt = select(models.Post).where(models.Post.id == id)
+    post = db.execute(stmt).scalars().first()
+    if not post:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Post not found"
         )
+    if post.owner_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+    db.delete(post)
     db.commit()
