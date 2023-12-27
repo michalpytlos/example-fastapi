@@ -33,3 +33,14 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(
         server_default=text("(TIMEZONE('utc', CURRENT_TIMESTAMP))")
     )
+
+
+class Vote(Base):
+    __tablename__ = "votes"
+
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey(column="users.id", ondelete="CASCADE"), primary_key=True
+    )
+    post_id: Mapped[int] = mapped_column(
+        ForeignKey(column="posts.id", ondelete="CASCADE"), primary_key=True
+    )
