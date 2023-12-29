@@ -1,19 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from .. import database, models, schemas, security
 
 router = APIRouter(prefix="/posts", tags=["posts"])
-
-
-@router.get("")
-def get_posts(
-    db: Session = Depends(database.get_db), limit=10, offset=0
-) -> list[schemas.PostOut]:
-    stmt = select(models.Post).limit(limit).offset(offset)
-    posts = db.execute(stmt).scalars().all()
-    return posts
 
 
 def get_current_post(id: int, db: Session = Depends(database.get_db)) -> models.Post:
@@ -26,9 +17,46 @@ def get_current_post(id: int, db: Session = Depends(database.get_db)) -> models.
     return post
 
 
+@router.get("")
+def get_posts(
+    db: Session = Depends(database.get_db), limit=10, offset=0
+) -> list[schemas.PostExtended]:
+    subq = (
+        select(*models.Post.__table__.c, func.count(models.Vote.post_id).label("votes"))
+        .join(models.Vote, models.Post.id == models.Vote.post_id, isouter=True)
+        .group_by(models.Post.id)
+        .limit(limit)
+        .offset(offset)
+        .subquery()
+    )
+    stmt = select(*subq.c, models.User.email.label("owner")).join(
+        models.User, subq.c.owner_id == models.User.id
+    )
+    posts = db.execute(stmt).all()
+    return posts
+
+
 @router.get("/{id}")
-def get_post(current_post=Depends(get_current_post)) -> schemas.PostOut:
-    return current_post
+def get_post(
+    id: int,
+    db: Session = Depends(database.get_db),
+) -> schemas.PostExtended:
+    subq = (
+        select(*models.Post.__table__.c, func.count(models.Vote.post_id).label("votes"))
+        .join(models.Vote, models.Post.id == models.Vote.post_id, isouter=True)
+        .where(models.Post.id == id)
+        .group_by(models.Post.id)
+        .subquery()
+    )
+    stmt = select(*subq.c, models.User.email.label("owner")).join(
+        models.User, subq.c.owner_id == models.User.id
+    )
+    post = db.execute(stmt).first()
+    if post is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Post not found"
+        )
+    return post
 
 
 @router.post("", status_code=status.HTTP_201_CREATED)

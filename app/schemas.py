@@ -18,6 +18,11 @@ class PostOut(PostIn):
         from_attributes = True
 
 
+class PostExtended(PostOut):
+    votes: int
+    owner: EmailStr
+
+
 class UserIn(BaseModel):
     email: EmailStr
     password: str

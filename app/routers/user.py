@@ -32,12 +32,7 @@ def get_user_me(
     return current_user
 
 
-@router.get("/{id}")
-def get_user(id: int, db: Session = Depends(database.get_db)) -> schemas.UserOut:
-    stmt = select(models.User).where(models.User.id == id)
-    user = db.execute(stmt).scalars().first()
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
-        )
-    return user
+@router.get("")
+def get_users(db: Session = Depends(database.get_db)) -> list[schemas.UserOut]:
+    stmt = select(models.User)
+    return db.execute(stmt).scalars().all()
