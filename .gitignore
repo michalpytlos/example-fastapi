@@ -1,2 +1,8 @@
 # Compiled Python bytecode
 *.py[cod]
+
+# IDE
+.vscode/settings.json
+
+# Env
+.env
