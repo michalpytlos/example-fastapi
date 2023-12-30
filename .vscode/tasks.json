@@ -3,6 +3,7 @@
     "tasks": [
         {
             "label": "alembic upgrade",
+            "dependsOn": ["postgres up", "postgres healthcheck"],
             "type": "shell",
             "command": "${command:python.interpreterPath}",
             "args": ["-m", "alembic", "upgrade", "head"],
@@ -20,5 +21,18 @@
                 }
             }   
         },
+        {
+            "label": "postgres healthcheck",
+            "type": "shell",
+            "command": "until pg_isready -h localhost -p 5432; do sleep 1; done",
+            "problemMatcher": []
+        },
+        {
+            "label": "postgres up",
+            "type": "shell",
+            "command": "docker",
+            "args": ["compose", "up", "-d", "postgres"],
+            "problemMatcher": [],
+        }
     ]
 }
