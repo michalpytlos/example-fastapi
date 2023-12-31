@@ -11,6 +11,26 @@ services:
         - postgres-data:/var/lib/postgresql/data
     ports:
         - 5432:5432
+    healthcheck:
+      test: ["CMD", "pg_isready"]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+  api:
+    build: .
+    container_name: postboard_api
+    env_file:
+      - .env
+    restart: always
+    volumes:
+      - ./app:/usr/src/postboard/app
+      - ./pyproject.toml:/usr/src/postboard/pyproject.toml
+      - ./poetry.lock:/usr/src/postboard/poetry.lock
+    ports:
+      - 8000:8000
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 volumes:
   postgres-data:
