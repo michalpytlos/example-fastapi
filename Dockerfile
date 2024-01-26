@@ -21,8 +21,11 @@ WORKDIR $WORK_DIR
 COPY pyproject.toml poetry.lock ./
 RUN poetry install
 
-# Copy required project files
+# Install project
 COPY app app
+RUN poetry install
+
+# Copy required project files
 COPY alembic alembic
 COPY alembic.ini alembic.ini
 COPY entrypoint.sh entrypoint.sh
