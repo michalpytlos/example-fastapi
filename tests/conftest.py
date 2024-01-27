@@ -25,3 +25,9 @@ def client() -> Generator:
     app.dependency_overrides[get_db] = override_get_db
     with TestClient(app) as c:
         yield c
+
+
+@pytest.fixture
+def user_data() -> dict:
+    return {"email": "test@test.com", "password": "pass123"}
+    
