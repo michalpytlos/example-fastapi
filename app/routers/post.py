@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import func, select
+from sqlalchemy import desc, func, select
 from sqlalchemy.orm import Session
 
 from .. import database, models, schemas, security
@@ -21,16 +21,19 @@ def get_current_post(id: int, db: Session = Depends(database.get_db)) -> models.
 def get_posts(
     db: Session = Depends(database.get_db), limit=10, offset=0
 ) -> list[schemas.PostExtended]:
+    """Return posts sorted by created_at."""
     subq = (
         select(*models.Post.__table__.c, func.count(models.Vote.post_id).label("votes"))
         .join(models.Vote, models.Post.id == models.Vote.post_id, isouter=True)
         .group_by(models.Post.id)
-        .limit(limit)
-        .offset(offset)
+        .order_by(desc(models.Post.created_at))
         .subquery()
     )
-    stmt = select(*subq.c, models.User.email.label("owner")).join(
-        models.User, subq.c.owner_id == models.User.id
+    stmt = (
+        select(*subq.c, models.User.email.label("owner"))
+        .join(models.User, subq.c.owner_id == models.User.id)
+        .limit(limit)
+        .offset(offset)
     )
     posts = db.execute(stmt).all()
     return posts
