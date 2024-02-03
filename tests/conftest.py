@@ -1,12 +1,12 @@
 from typing import Generator
 
 import pytest
+from database import create_test_db, override_get_db, testing_engine
 from fastapi.testclient import TestClient
 
-from app.main import app
 from app.database import get_db
+from app.main import app
 from app.models import Base
-from database import override_get_db, create_test_db, testing_engine
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -30,4 +30,3 @@ def client() -> Generator:
 @pytest.fixture
 def user_data() -> dict:
     return {"email": "test@test.com", "password": "pass123"}
-    

@@ -21,7 +21,9 @@ def test_login_for_access_token_no_user_401(client: TestClient, user_data: dict)
     assert r_token.status_code == 401
 
 
-def test_login_for_access_token_invalid_password_401(client: TestClient, user_data: dict):
+def test_login_for_access_token_invalid_password_401(
+    client: TestClient, user_data: dict
+):
     # create user
     r_create = client.post("/users", json=user_data)
     assert r_create.status_code == 201
