@@ -14,7 +14,7 @@ while getopts ":chf:" opt; do
         h)
             echo "Usage: test.sh [-c] [-f <file>]"
             echo "  -c: Run tests with coverage"
-            echo "  -f <file>: Run tests from given file only"
+            echo "  -f <file>[::<test>]: Run specified tests only"
             echo "  -h: Show this help message"
             exit 0
             ;;
@@ -40,11 +40,13 @@ trap cleanup EXIT
 docker compose up -d postgres
 until pg_isready -h localhost -p 5432; do sleep 1; done;
 
-
 # Load env vars
 while read -r line; do
     export "$(echo $line)"
 done < .env.local
+
+# Activate venv
+source $(poetry env info --path)/bin/activate
 
 # Run tests
 COMMAND="pytest $PYTEST_ARGS -s -vv $TESTS_TO_EXECUTE"
