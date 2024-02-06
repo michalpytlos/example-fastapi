@@ -6,3 +6,6 @@
 
 # Env
 .env
+
+# Tests results
+.coverage
