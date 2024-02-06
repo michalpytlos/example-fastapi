@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class DatabaseConnection(BaseModel):
@@ -17,11 +17,10 @@ class OAuth2(BaseModel):
 
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_nested_delimiter="__")
+
     db: DatabaseConnection
     oath2: OAuth2
-
-    class Config:
-        env_nested_delimiter = "__"
 
 
 settings = Settings()
