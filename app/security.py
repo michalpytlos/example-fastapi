@@ -35,7 +35,7 @@ def create_access_token(data: dict) -> str:
 def verify_access_token(token: str) -> schemas.TokenData:
     try:
         payload = jwt.decode(token, key=SECRET_KEY, algorithms=[ALGORITHM])
-        user_id: str = payload.get("sub")
+        user_id = payload.get("sub")
         if user_id is None:
             raise credentials_exception
     except JWTError:

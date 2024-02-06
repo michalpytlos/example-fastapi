@@ -17,10 +17,8 @@ def get_current_post(id: int, db: Session = Depends(database.get_db)) -> models.
     return post
 
 
-@router.get("")
-def get_posts(
-    db: Session = Depends(database.get_db), limit=10, offset=0
-) -> list[schemas.PostExtended]:
+@router.get("", response_model=list[schemas.PostExtended])
+def get_posts(db: Session = Depends(database.get_db), limit=10, offset=0):
     """Return posts sorted by created_at."""
     subq = (
         select(*models.Post.__table__.c, func.count(models.Vote.post_id).label("votes"))
@@ -59,15 +57,15 @@ def get_post(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Post not found"
         )
-    return post
+    return schemas.PostExtended.model_validate(post)
 
 
-@router.post("", status_code=status.HTTP_201_CREATED)
+@router.post("", status_code=status.HTTP_201_CREATED, response_model=schemas.PostOut)
 def create_post(
     post: schemas.PostIn,
     db: Session = Depends(database.get_db),
     current_user: models.User = Depends(security.get_current_user),
-) -> schemas.PostOut:
+):
     new_post = models.Post(owner_id=current_user.id, **post.model_dump())
     db.add(new_post)
     db.commit()
@@ -76,13 +74,13 @@ def create_post(
     return new_post
 
 
-@router.put("/{id}")
+@router.put("/{id}", response_model=schemas.PostOut)
 def update_post(
     updated_post: schemas.PostIn,
     db: Session = Depends(database.get_db),
     current_user: models.User = Depends(security.get_current_user),
     current_post: models.Post = Depends(get_current_post),
-) -> schemas.PostOut:
+):
     if current_post.owner_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
     for k, v in updated_post.model_dump().items():

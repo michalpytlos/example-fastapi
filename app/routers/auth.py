@@ -18,11 +18,11 @@ def authenticate_user(db: Session, email: str, password: str) -> models.User | N
     return user
 
 
-@router.post("/token")
+@router.post("/token", response_model=schemas.Token)
 def login_for_access_token(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(database.get_db),
-) -> schemas.Token:
+):
     user = authenticate_user(db, email=form_data.username, password=form_data.password)
     if not user:
         raise HTTPException(

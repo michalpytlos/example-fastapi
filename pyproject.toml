@@ -29,6 +29,11 @@ mypy = "^1.8.0"
 flake8 = "^7.0.0"
 black = "^24.1.1"
 isort = "^5.13.2"
+types-python-jose = "^3.3.4.20240106"
+types-passlib = "^1.7.7.20240106"
+
+[tool.mypy]
+plugins = ["pydantic.mypy"]
 
 [build-system]
 requires = ["poetry-core"]
