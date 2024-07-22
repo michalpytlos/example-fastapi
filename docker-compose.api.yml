@@ -14,7 +14,7 @@ services:
       - ./pyproject.toml:/usr/src/postboard/pyproject.toml
       - ./poetry.lock:/usr/src/postboard/poetry.lock
     ports:
-      - 8000:8000
+      - ${UVICORN_PORT}:${UVICORN_PORT}
     depends_on:
       postgres:
         condition: service_healthy

@@ -21,5 +21,5 @@ App runs locally, database runs in a container.
 * or use VS Code - see the configuration in `.vscode/settings.json`
 
 ### Running app
-* Run using docker: `docker compose -f docker-compose.yml -f docker-compose.api.yml up -d`
+* Run using docker: `make up`
 * or use VS Code - see the configuration in `.vscode/launch.json`
