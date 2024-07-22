@@ -1,7 +1,16 @@
-.PHONY: up-setup build-test up-test flake8 isort black mypy lint bandit pip-audit
+.PHONY: local-setup build up-setup up down build-test up-test flake8 isort black mypy lint bandit pip-audit
 
 APP_CONTAINER=postboard-api-1
 TEST_CONTAINER=postboard-api-test-1
+
+local-setup:
+	@if [ ! -f .env.local ]; then \
+		cp .env.example .env.local &&  \
+		sed -i 's/^DB__HOST=.*/DB__HOST=localhost/' .env.local && \
+		echo ".env.local file created"; \
+	else \
+		echo ".env.local already exists"; \
+	fi
 
 # app
 build:
