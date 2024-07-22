@@ -1,15 +1,26 @@
 .PHONY: up-setup build-test up-test flake8 isort black mypy lint bandit pip-audit
 
+APP_CONTAINER=postboard-api-1
 TEST_CONTAINER=postboard-api-test-1
 
-down:
-	docker compose -f docker-compose.yml -f docker-compose.api.yml down
+# app
+build:
+	docker build --target app --tag postboard-api .
 up-setup:
+	@if [ ! -f .env ]; then \
+		cp .env.example .env && echo ".env file created"; \
+	else \
+		echo ".env already exists"; \
+	fi
 	@if [ ! -f .env.test ]; then \
 		cp .env.example .env.test && echo ".env.test file created"; \
 	else \
 		echo ".env.test already exists"; \
 	fi
+up: up-setup
+	docker compose -f docker-compose.yml -f docker-compose.api.yml up -d api
+down:
+	docker compose -f docker-compose.yml -f docker-compose.api.yml down
 
 # tests
 build-test:
