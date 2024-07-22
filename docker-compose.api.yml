@@ -1,8 +1,11 @@
 version: '3.9'
 services:
   api:
-    build: .
-    container_name: postboard_api
+    build:
+      context: .
+      target: app
+    image: postboard-api
+    container_name: postboard-api-1
     env_file:
       - .env
     restart: always
@@ -12,6 +15,20 @@ services:
       - ./poetry.lock:/usr/src/postboard/poetry.lock
     ports:
       - 8000:8000
+    depends_on:
+      postgres:
+        condition: service_healthy
+  test:
+    build:
+      context: .
+      target: test
+    image: postboard-api-test
+    container_name: postboard-api-test-1
+    command: ["tail", "-f", "/dev/null"]
+    env_file:
+      - .env.test
+    volumes:
+      - ./coverage_report:/app/coverage_report
     depends_on:
       postgres:
         condition: service_healthy

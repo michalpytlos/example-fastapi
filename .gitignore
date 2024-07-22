@@ -6,6 +6,7 @@
 
 # Env
 .env
+.env.test
 
-# Tests results
-.coverage
+# Ctags
+tags
