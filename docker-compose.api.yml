@@ -10,9 +10,7 @@ services:
       - .env
     restart: always
     volumes:
-      - ./app:/usr/src/postboard/app
-      - ./pyproject.toml:/usr/src/postboard/pyproject.toml
-      - ./poetry.lock:/usr/src/postboard/poetry.lock
+      - ./app:/app/app
     ports:
       - ${UVICORN_PORT}:${UVICORN_PORT}
     depends_on:
