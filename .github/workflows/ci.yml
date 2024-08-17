@@ -1,0 +1,32 @@
+name: CI pipeline
+
+on:
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  static_analysis_and_tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build test image
+        run: make build-test
+
+      - name: Linting
+        run: make lint
+
+      - name: Bandit
+        run: make bandit
+
+      - name: Vulnerability check
+        run: make pip-audit
+      
+      - name: Unit tests
+        run: make test
