@@ -16,12 +16,11 @@ WORKDIR /app
 
 COPY --from=requirements /tmp/requirements.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
-COPY app app
-
 
 # Image with app
 FROM base AS app
 
+COPY app app
 COPY alembic alembic
 COPY alembic.ini alembic.ini
 COPY entrypoint.sh entrypoint.sh
@@ -35,6 +34,7 @@ COPY --from=requirements /tmp/requirements-test.txt requirements-test.txt
 
 RUN pip install --no-cache-dir -r requirements-test.txt
 
+COPY app app
 COPY tests tests
 COPY pyproject.toml .flake8 ./
 ENV PYTHONPATH="${PYTHONPATH}:/app/app"
