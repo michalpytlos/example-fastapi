@@ -1,4 +1,4 @@
-.PHONY: local-setup build up-setup up down build-test up-test flake8 isort black mypy lint bandit pip-audit
+.PHONY: local-setup build up-setup up down build-test up-test test flake8 isort black mypy lint bandit pip-audit
 
 APP_CONTAINER=postboard-api-1
 TEST_CONTAINER=postboard-api-test-1
@@ -27,15 +27,15 @@ up-setup:
 		echo ".env.test already exists"; \
 	fi
 up: up-setup
-	docker compose -f docker-compose.yml -f docker-compose.api.yml up -d api
+	docker compose up -d api
 down:
-	docker compose -f docker-compose.yml -f docker-compose.api.yml down
+	docker compose down
 
 # tests
 build-test:
 	docker build --target test --tag postboard-api-test .
 up-test: up-setup
-	docker compose -f docker-compose.yml -f docker-compose.api.yml up -d test
+	docker compose up -d test
 test: up-test
 	PYTEST_ARGS="--cov=app --cov-report=term-missing:skip-covered --cov-branch --cov-report=html:coverage_report"; \
 	docker exec $(TEST_CONTAINER) pytest $$PYTEST_ARGS tests
