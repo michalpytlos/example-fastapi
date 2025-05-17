@@ -49,6 +49,7 @@ done < .env.local
 source $(poetry env info --path)/bin/activate
 
 # Run tests
+export PYTHONPATH=./
 COMMAND="pytest $PYTEST_ARGS -s -vv $TESTS_TO_EXECUTE"
 echo $COMMAND
 eval $COMMAND

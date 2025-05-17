@@ -37,4 +37,4 @@ RUN pip install --no-cache-dir -r requirements-test.txt
 COPY app app
 COPY tests tests
 COPY pyproject.toml .flake8 ./
-ENV PYTHONPATH="${PYTHONPATH}:/app/app"
+ENV PYTHONPATH="/app"
