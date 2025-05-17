@@ -1,6 +1,9 @@
 from fastapi import FastAPI
 
+from .log import setup_logging
 from .routers import auth, post, user
+
+setup_logging()
 
 app = FastAPI()
 

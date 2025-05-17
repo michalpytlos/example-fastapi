@@ -4,22 +4,29 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from .. import database, models, schemas, security
+from ..log import logger
 
 router = APIRouter(prefix="/users", tags=["users"])
 
 
 @router.post("", status_code=status.HTTP_201_CREATED, response_model=schemas.UserOut)
 def create_user(user: schemas.UserIn, db: Session = Depends(database.get_db)):
+    context_logger = logger.bind(user=user.email)
+    context_logger.info("Creating new user...")
     password_hash = security.pwd_context.hash(user.password)
     new_user = models.User(email=user.email, password_hash=password_hash)
     db.add(new_user)
     try:
         db.commit()
     except IntegrityError:
+        context_logger.warning(
+            "Unable to create user - user with this email already exists."
+        )
         raise HTTPException(
             status_code=409, detail="User with this email already exists."
         )
     db.refresh(new_user)
+    context_logger.info(f"New user created ({new_user.id}).")
     return new_user
 
 

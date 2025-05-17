@@ -4,6 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from .. import database, models, schemas, security
+from ..log import logger
 
 router = APIRouter(tags=["auth"])
 
@@ -23,12 +24,16 @@ def login_for_access_token(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(database.get_db),
 ):
+    context_logger = logger.bind(user=form_data.username)
+    context_logger.info("Authenticating user...")
     user = authenticate_user(db, email=form_data.username, password=form_data.password)
     if not user:
+        context_logger.info("User authentication failed.")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    context_logger.info("User authenticated.")
     access_token = security.create_access_token(data={"sub": str(user.id)})
     return {"access_token": access_token, "token_type": "bearer"}

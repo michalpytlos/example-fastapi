@@ -3,6 +3,7 @@ from sqlalchemy import desc, func, select
 from sqlalchemy.orm import Session
 
 from .. import database, models, schemas, security
+from ..log import logger
 
 router = APIRouter(prefix="/posts", tags=["posts"])
 
@@ -66,10 +67,13 @@ def create_post(
     db: Session = Depends(database.get_db),
     current_user: models.User = Depends(security.get_current_user),
 ):
+    context_logger = logger.bind(user=current_user.email)
+    context_logger.info("Creating new post...")
     new_post = models.Post(owner_id=current_user.id, **post.model_dump())
     db.add(new_post)
     db.commit()
     db.refresh(new_post)
+    context_logger.info(f"Post created ({new_post.id}).")
 
     return new_post
 
@@ -81,11 +85,17 @@ def update_post(
     current_user: models.User = Depends(security.get_current_user),
     current_post: models.Post = Depends(get_current_post),
 ):
+    context_logger = logger.bind(user=current_user.email)
+    context_logger.info(f"Updating post {current_post.id}...")
     if current_post.owner_id != current_user.id:
+        context_logger.warning(
+            f"Post {current_post.id} cannot be updated because it belongs to a different user."
+        )
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
     for k, v in updated_post.model_dump().items():
         current_post.__setattr__(k, v)
     db.commit()
+    context_logger.info(f"Post {current_post.id} updated.")
     return current_post
 
 
@@ -95,10 +105,16 @@ def delete_post(
     current_user: models.User = Depends(security.get_current_user),
     current_post: models.Post = Depends(get_current_post),
 ):
+    context_logger = logger.bind(user=current_user.email)
+    context_logger.info(f"Deleting post {current_post.id}...")
     if current_post.owner_id != current_user.id:
+        context_logger.warning(
+            f"Post {current_post.id} cannot be deleted because it belongs to a different user."
+        )
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
     db.delete(current_post)
     db.commit()
+    context_logger.info(f"Post {current_post.id} deleted.")
 
 
 def get_existing_vote(db: Session, user_id: int, post_id: int) -> models.Vote | None:
